@@ -1,10 +1,10 @@
 $(function () {
-    var $despesaChart = $("#grafico_renda_por_ano");
+    var $rendaChart2 = $("#grafico_renda_por_ano");
       $.ajax({
-        url: $despesaChart.data("url"),
+        url: $rendaChart2.data("url"),
         success: function (data) {
 
-          var ctx = $despesaChart[0].getContext("2d");
+          var ctx = $rendaChart2[0].getContext("2d");
 
           new Chart(ctx, {
             type: 'doughnut',
@@ -12,9 +12,7 @@ $(function () {
               labels: data.labels,
               datasets: [{
                 label: 'Total de Renda por Ano',
-                backgroundColor:[
-                    '#696969', '#808080', '#A9A9A9', '#C0C0C0', '#D3D3D3'
-                ],
+                backgroundColor:'blue',
                 
                 data: data.data
               }]          

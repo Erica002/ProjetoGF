@@ -12,9 +12,7 @@ $(function () {
               labels: data.labels,
               datasets: [{
                 label: 'Total de Despesas por Ano',
-                backgroundColor:[
-                    '#696969', '#808080', '#A9A9A9', '#C0C0C0', '#D3D3D3'
-                ],
+                backgroundColor: 'green',
                 
                 data: data.data
               }]          
