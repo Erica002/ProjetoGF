@@ -25,7 +25,7 @@ $(function () {
             },
             title: {
               display: true,
-              text: 'Despesas por Ano'
+              text: 'Despesas por Mês'
           }
       }
     });
