@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<head>
+    <style>
+        body{
+            margin-top:20px;
+            background:#FAFAFA;
+        }
+        .order-card {
+            color: #fff;
+        }
+
+        .bg-c-blue {
+            background: linear-gradient(45deg,#4099ff,#73b4ff);
+        }
+
+        .bg-c-green {
+            background: linear-gradient(45deg,#2ed8b6,#59e0c5);
+        }
+
+        .bg-c-yellow {
+            background: linear-gradient(45deg,#FFB64D,#ffcb80);
+        }
+
+        .bg-c-pink {
+            background: linear-gradient(45deg,#FF5370,#ff869a);
+        }
+
+
+        .card {
+            border-radius: 5px;
+            -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+            box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+            border: none;
+            margin-bottom: 30px;
+            -webkit-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .card .card-block {
+            padding: 25px;
+        }
+
+        .order-card i {
+            font-size: 26px;
+        }
+
+        .f-left {
+            float: left;
+        }
+
+        .f-right {
+            float: right;
+        }
+    </style>
+</head>
+
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-xl-6 mt-5">
+            <div class="card bg-c-pink order-card">
+                <div class="card-block">
+                    <h6 class="m-b-20">RECEITA TOTAL</h6>
+                    <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>R$ {{valorreceita}}</span></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-xl-6 mt-5">
+            <div class="card bg-c-yellow order-card">
+                <div class="card-block">
+                    <h6 class="m-b-20">SALDO</h6>
+                    <h2 class="text-right"><i class="fa fa-refresh f-left"></i><span> R$ {{valorsaldo}}</span></h2>
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+<div class="container">    
+    {% include 'msgs.html' %}
+    <div class="container-fluid px-4">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Gerenciar Receita</h4>
+                <a type="button" class="btn btn-dark float-end" href="{%url 'add-ganho' %}">Nova renda</a>
+            </div>
+            
+            <div class="card-body" style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Detalhes</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for renda in obj_page %}
+                        <tr>
+                            <td>{{ renda.detalhes }}</td>
+                            <td>{{ renda.valor_renda }}</td>
+                            <td>{{ renda.data }}</td>
+                            <td><a type="button" class="btn btn-warning" href="/update-ganhos/{{ renda.id }}">Editar</a>
+                                <a type="button" class="btn btn-danger" href="/delete-ganhos/{{ renda.id }}">Remover</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="container">
+                    <div class="float-right">
+                        Página {{obj_page.number}} de {{ obj_page.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination justify-content-end">
+                        {% if obj_page.has_previous %}
+                        <li {% if obj_page.number == 1 %} class="page-item active" {% endif %}>
+                            <a class="page-link" href="?page=1">&laquo; 1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ obj_page.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% if obj_page.has_next %}
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.next_page_number }}">Próximo</a>
+                        </li>
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.paginator.num_pages }}">{{ obj_page.paginator.num_pages}} &raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="container"">
+        <a type="button" class="btn btn-dark" style="margin-left: 20px;" href="{%url 'grafico-renda-anual' %}">Receita por Ano</a>
+        <div id="container" style="width: 75%;">
+            <canvas id="grafico_renda_por_mes" data-url="{% url 'grafico_renda_por_mes' %}"></canvas>
+        </div>
+    </div>
+</div>
+    
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script src="{% static 'js/graficoRendaPorMes.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">    
+    <div class="container-fluid px-4">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Minha Lista de Desejos</h4>
+                <a type="button" class="btn btn-dark float-end" href="{%url 'add-wish' %}">Novo item</a>
+            </div>
+            
+            <div class="card-body" style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Detalhes</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col">Valor Salvo</th>
+                            <th scope="col">Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wish in obj_page %}
+                        <tr>
+                            <td>{{ wish.detalhes }}</td>
+                            <td>{{ wish.valor_necessario }}</td>
+                            <td>{{ wish.valor_salvo }}</td>
+                            <td>
+                                <a type="button" class="btn btn-warning" href="/update-wish/{{ wish.id }}">Editar</a>
+                                <a type="button" class="btn btn-danger" href="/delete-wish/{{ wish.id }}">Remover</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="container">
+                    <div class="float-right">
+                        Página {{obj_page.number}} de {{ obj_page.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination justify-content-end">
+                        {% if obj_page.has_previous %}
+                        <li {% if obj_page.number == 1 %} class="page-item active" {% endif %}>
+                            <a class="page-link" href="?page=1">&laquo; 1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ obj_page.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% if obj_page.has_next %}
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.next_page_number }}">Próximo</a>
+                        </li>
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.paginator.num_pages }}">{{ obj_page.paginator.num_pages}} &raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

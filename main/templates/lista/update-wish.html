@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container-fluid px-4">
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Editar item</h4>
+        </div>
+        <div class="card-body" style="overflow-x:auto;">
+            <form method="post">
+                {% csrf_token %}
+                {{form | crispy}}
+                <a type="button" class="btn btn-danger mt-4" href="{%url 'list-wish' %}">Cancelar</a>
+                <button type="submit" class="btn btn-success mt-4">Salvar alterações</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
