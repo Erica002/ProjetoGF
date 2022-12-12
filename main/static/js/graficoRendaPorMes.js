@@ -24,7 +24,7 @@ $(function () {
               },
               title: {
                 display: true,
-                text: 'Receita por Mês'
+                text: 'Renda por Mês'
             }
         }
       });
