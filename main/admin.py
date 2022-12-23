@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Categoria,Despesa, Renda
+from .models import Categoria, Despesa, Renda
+
 # Register your models here.
 
 admin.site.register(Categoria)

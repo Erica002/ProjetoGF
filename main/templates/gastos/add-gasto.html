@@ -1,43 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load crispy_forms_tags %}
 
-<div class="container">    
+<div class="container">
     <div class="container-fluid px-4">
         <div class="card mt-4">
             <div class="card-header">
                 <h4>Adicionar Despesa</h4>
                 <a type="button" class="btn btn-dark float-end" href="{%url 'add-categoria' %}">Nova Categoria</a>
             </div>
-        <div class="card-body" style="overflow-x:auto;">
-            <form action="{% url 'add-gasto' %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="">Descrição</label>
-                    <input type="text" name="detalhes" class="form-control form-control-sm" id="" value="{{valor.detalhes}}" required>
-                </div>
-                <div class="form-group">
-                    <label for="">Categoria</label>
-                    <select class="form-control" name="categoria"">
-                        {% for categoria in categorias %} 
-                        <option name="categoria" value="{{categoria.nome}}">{{categoria.nome}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="">Valor gasto</label>
-                    <input type="number" name="valor_despesa" class="form-control form-control-sm" id="" value="{{valor.valor_despesa}}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="">Data</label>
-                    <input type="date" name="data" class="form-control form-control-sm" value="{{valor.data}}" id="">
-                </div>
+            <div class="card-body" style="overflow-x:auto;">
+                <form action="{% url 'add-gasto' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{form.detalhes.errors}}
+                        <label for="">Detalhes</label>
+                        <input type="text" name="detalhes" class="form-control form-control-sm">
+                    </div>
+                    <div class="form-groupr row mb-5">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Categoria</label>
+                        <div class="form-check form-check-inline">{{ form.categoria }}</div>
+                    </div>
+                    <div class="form-groupr row mb-5">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3">Forma de Pagamento</label>
+                        <div class="form-check form-check-inline">{{ form.forma_pagamento }}</div>
+                    </div>
+                    <div class="form-group">
+                        {{form.valor_despesa.errors}}
+                        <label for="">Valor gasto</label>
+                        <input type="number" name="valor_despesa" class="form-control form-control-sm">
+                    </div>
 
-                <input type="submit" value="Adicionar gasto" class="btn btn-primary mt-3 btn-primary-sm">
-                <a type="button" class="btn btn-danger mt-3" href="{%url 'main' %}">Cancelar</a>
-            </form>
+                    <div class="form-group">
+                        {{form.data.errors}}
+                        <label for="">Data</label>
+                        <input type="date" name="data" class="form-control form-control-sm">
+                    </div>
+
+                    <input type="submit" value="Adicionar gasto" class="btn btn-primary mt-3 btn-primary-sm">
+                    <a type="button" class="btn btn-danger mt-3" href="{%url 'main' %}">Cancelar</a>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-{% endblock %}
+    {% endblock %}

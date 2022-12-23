@@ -10,19 +10,33 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0002_despesa_forma_pagamento_renda_origem'),
+        ("main", "0002_despesa_forma_pagamento_renda_origem"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Wishlist',
+            name="Wishlist",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('detalhes', models.CharField(max_length=255)),
-                ('valor_necessario', models.FloatField()),
-                ('valor_salvo', models.FloatField(default=0)),
-                ('data', models.DateField(default=django.utils.timezone.now)),
-                ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("detalhes", models.CharField(max_length=255)),
+                ("valor_necessario", models.FloatField()),
+                ("valor_salvo", models.FloatField(default=0)),
+                ("data", models.DateField(default=django.utils.timezone.now)),
+                (
+                    "usuario",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

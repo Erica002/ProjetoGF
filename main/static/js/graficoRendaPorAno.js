@@ -24,7 +24,7 @@ $(function () {
               },
               title: {
                 display: true,
-                text: 'Renda por Ano'
+                text: 'Receita por Ano'
             }
         }
       });
