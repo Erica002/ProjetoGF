@@ -17,7 +17,7 @@ CLASSES_CHOICES = [
 
 class Categoria(models.Model):
     nome = models.CharField(max_length=255)
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nome
@@ -31,7 +31,7 @@ class Despesa(models.Model):
     forma_pagamento = models.CharField(
         default="Dinheiro", max_length=155, choices=CLASSES_CHOICES
     )
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.detalhes
@@ -40,9 +40,10 @@ class Despesa(models.Model):
 class Renda(models.Model):
     detalhes = models.CharField(max_length=255)
     valor_renda = models.FloatField()
-    origem = models.CharField(default="Extra", max_length=155, choices=RENDA_CHOICES)
+    origem = models.CharField(
+        default="Extra", max_length=155, choices=RENDA_CHOICES)
     data = models.DateField(default=now)
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.detalhes
@@ -53,4 +54,4 @@ class Wishlist(models.Model):
     valor_necessario = models.FloatField()
     valor_salvo = models.FloatField(default=0)
     data = models.DateField(default=now)
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
