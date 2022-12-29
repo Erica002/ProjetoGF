@@ -57,12 +57,13 @@ class CreateGastoView(CreateView):
         obj.save()
         return HttpResponseRedirect("/")
 
+
 @method_decorator(login_required, name="dispatch")
 class GastoUpdateView(UpdateView):
     model = Despesa
     form_class = DespesasUpdateForm
     template_name = "gastos/gasto_form.html"
-    success_url = '/'  
+    success_url = "/"
 
     def get_form_kwargs(self):
         kwargs = super(GastoUpdateView, self).get_form_kwargs()
@@ -73,7 +74,7 @@ class GastoUpdateView(UpdateView):
 @method_decorator(login_required, name="dispatch")
 class DeleteGastoView(DeleteView):
     model = Despesa
-    success_url = '/'
+    success_url = "/"
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
@@ -84,7 +85,7 @@ class CreateCategoriaView(CreateView):
     model = Categoria
     form_class = CategoriaForm
     template_name = "gastos/categoria_form.html"
-    
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
@@ -97,7 +98,7 @@ class UpdateCategoriaView(UpdateView):
     model = Categoria
     form_class = CategoriaForm
     template_name = "gastos/categoria_form.html"
-    success_url = '/list-categoria'
+    success_url = "/list-categoria"
 
 
 @login_required(login_url="/autenticacao/login")
@@ -114,7 +115,7 @@ def list_categoria(request):
 @method_decorator(login_required, name="dispatch")
 class DeleteCategoriaView(DeleteView):
     model = Categoria
-    success_url = '/list-categoria'
+    success_url = "/list-categoria"
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
@@ -154,25 +155,26 @@ class CreateRendaView(CreateView):
     model = Renda
     form_class = RendaForm
     template_name = "ganhos/ganho_form.html"
-    
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
         obj.save()
         return HttpResponseRedirect("list-ganhos")
 
+
 @method_decorator(login_required, name="dispatch")
 class UpdateRendaView(UpdateView):
     model = Renda
     form_class = RendaForm
     template_name = "ganhos/ganho_form.html"
-    success_url = '/list-ganhos'
+    success_url = "/list-ganhos"
 
 
 @method_decorator(login_required, name="dispatch")
 class DeleteRendaView(DeleteView):
     model = Renda
-    success_url = '/list-ganhos'
+    success_url = "/list-ganhos"
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
@@ -229,7 +231,7 @@ def grafico_despesas_por_mes(request):
 class MostraGraficoMensalView(ListView):
     model = Despesa
     template_name = "gastos/grafico-mensal.html"
-    
+
 
 @login_required(login_url="/autenticacao/login")
 def grafico_despesas_por_ano(request):
@@ -258,6 +260,7 @@ def grafico_despesas_por_ano(request):
 class MostraGraficoAnualView(ListView):
     model = Despesa
     template_name = "gastos/grafico-anual.html"
+
 
 # GRÁFICOS RECEITA
 @login_required(login_url="/autenticacao/login")
@@ -305,10 +308,12 @@ def grafico_renda_por_ano(request):
         }
     )
 
+
 @method_decorator(login_required, name="dispatch")
 class MostraGraficoRendaAnualView(ListView):
     model = Renda
     template_name = "ganhos/grafico-renda-anual.html"
+
 
 # LISTA DE DESEJOS
 @login_required(login_url="/autenticacao/login")
@@ -331,7 +336,7 @@ class WishCreateView(CreateView):
     model = Wishlist
     form_class = WishForm
     template_name = "lista/wish_form.html"
-    
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
@@ -344,15 +349,17 @@ class UpdateWishView(UpdateView):
     model = Wishlist
     form_class = WishForm
     template_name = "lista/wish_form.html"
-    success_url = '/list-wish'
+    success_url = "/list-wish"
+
 
 @method_decorator(login_required, name="dispatch")
 class DeleteWishView(DeleteView):
     model = Wishlist
-    success_url = '/list-wish'
+    success_url = "/list-wish"
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+
 
 @login_required(login_url="/autenticacao/login")
 def wish_delete(request, id):
