@@ -4,18 +4,18 @@ from . import views
 urlpatterns = [
     # Despesas
     path("", views.index, name="main"),
-    path("add-gasto", views.CreateGastoView.as_view(), name="add-gasto"),
-    path("add-categoria", views.add_categoria, name="add-categoria"),
-    path("update-gasto/<int:id>", views.gasto_update, name="update-gasto"),
-    path("delete-gasto/<int:id>", views.gasto_delete, name="delete-gasto"),
+    path("add-gasto", views.CreateGastoView.as_view(), name="gasto_form"),
+    path("add-categoria", views.CreateCategoriaView.as_view(), name="categoria_form"),
+    path("update-gasto/<int:pk>", views.GastoUpdateView.as_view(), name="gasto_form"),
+    path("delete-gasto/<int:pk>", views.DeleteGastoView.as_view(), name="delete-gasto"),
     path("list-categoria", views.list_categoria, name="list-categoria"),
-    path("update-categoria/<int:id>", views.categoria_update, name="update-categoria"),
-    path("delete-categoria/<int:id>", views.categoria_delete, name="delete-categoria"),
+    path("update-categoria/<int:pk>", views.UpdateCategoriaView.as_view(), name="categoria_form"),
+    path("delete-categoria/<int:pk>", views.DeleteCategoriaView.as_view(), name="delete-categoria"),
     # Receita
     path("list-ganhos", views.list_ganho, name="list-ganhos"),
-    path("add-ganho", views.add_ganho, name="add-ganho"),
-    path("update-ganhos/<int:id>", views.ganho_update, name="update-ganhos"),
-    path("delete-ganhos/<int:id>", views.ganho_delete, name="delete-ganhos"),
+    path("add-ganho", views.CreateRendaView.as_view(), name="ganho_form"),
+    path("update-ganhos/<int:pk>", views.UpdateRendaView.as_view(), name="ganho_form"),
+    path("delete-ganhos/<int:pk>", views.DeleteRendaView.as_view(), name="delete-ganhos"),
     # Gráficos
     path(
         "grafico_por_categoria/",
@@ -27,13 +27,13 @@ urlpatterns = [
         views.grafico_despesas_por_mes,
         name="grafico_despesas_por_mes",
     ),
-    path("grafico-mensal", views.mostra_grafico_mensal, name="grafico-mensal"),
+    path("grafico-mensal", views.MostraGraficoMensalView.as_view(), name="grafico-mensal"),
     path(
         "grafico_despesas_por_ano/",
         views.grafico_despesas_por_ano,
         name="grafico_despesas_por_ano",
     ),
-    path("grafico-anual", views.mostra_grafico_anual, name="grafico-anual"),
+    path("grafico-anual", views.MostraGraficoAnualView.as_view(), name="grafico-anual"),
     path(
         "grafico_renda_por_mes/",
         views.grafico_renda_por_mes,
@@ -44,10 +44,10 @@ urlpatterns = [
         views.grafico_renda_por_ano,
         name="grafico_renda_por_ano",
     ),
-    path("grafico-renda-anual", views.mostra_renda_anual, name="grafico-renda-anual"),
+    path("grafico-renda-anual", views.MostraGraficoRendaAnualView.as_view(), name="grafico-renda-anual"),
     # WISHLIST
     path("list-wish", views.list_wish, name="list-wish"),
-    path("add-wish", views.add_wish, name="add-wish"),
-    path("update-wish/<int:id>", views.wish_update, name="update-wish"),
-    path("delete-wish/<int:id>", views.wish_delete, name="delete-wish"),
+    path("add-wish", views.WishCreateView.as_view(), name="wish_form"),
+    path("update-wish/<int:pk>", views.UpdateWishView.as_view(), name="wish_form"),
+    path("delete-wish/<int:pk>", views.DeleteWishView.as_view(), name="delete-wish"),
 ]

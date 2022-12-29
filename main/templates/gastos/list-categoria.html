@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">    
+    {% include 'msgs.html' %}
+    <div class="container-fluid px-4">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Minhas Categorias de Gasto</h4>
+                <a type="button" class="btn btn-dark float-end" href="{%url 'categoria_form' %}">Nova Categoria</a>
+            </div>
+            
+            <div class="card-body" style="overflow-x:auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for categoria in obj_page %}
+                        <tr>
+                            <td>{{ categoria.nome }}</td>
+                            <td>
+                                <a type="button" class="btn btn-warning" href="{% url 'categoria_form' categoria.id %}">Editar</a>
+                                <a type="button" class="btn btn-danger" href="{% url 'delete-categoria' categoria.id %}">Remover</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="container">
+                    <div class="float-right">
+                        Página {{obj_page.number}} de {{ obj_page.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination justify-content-end">
+                        {% if obj_page.has_previous %}
+                        <li {% if obj_page.number == 1 %} class="page-item active" {% endif %}>
+                            <a class="page-link" href="?page=1">&laquo; 1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ obj_page.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% if obj_page.has_next %}
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.next_page_number }}">Próximo</a>
+                        </li>
+                        <li class="page-item"> 
+                            <a class="page-link" href="?page={{ obj_page.paginator.num_pages }}">{{ obj_page.paginator.num_pages}} &raquo;</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

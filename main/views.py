@@ -1,19 +1,21 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 from .models import Despesa, Categoria, Renda, Wishlist
-from .forms import CategoriaForm, RendaForm, WishForm, DespesaForm
+from .forms import CategoriaForm, DespesasUpdateForm, RendaForm, WishForm, DespesaForm
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpResponseRedirect, JsonResponse
-from django.views.generic.edit import CreateView
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
 # FUNÇÕES RELACIONADAS A DESPESAS
 @login_required(login_url="/autenticacao/login")
 def index(request):
-    despesas = Despesa.objects.filter(usuario=request.user)
-    rendas = Renda.objects.filter(usuario=request.user)
-    paginator = Paginator(despesas, 5)
+    despesas = Despesa.objects.filter(user=request.user)
+    rendas = Renda.objects.filter(user=request.user)
+    paginator = Paginator(despesas, 7)
     numero_page = request.GET.get("page")
     obj_page = Paginator.get_page(paginator, numero_page)
     valordespesas = 0
@@ -42,7 +44,7 @@ def index(request):
 class CreateGastoView(CreateView):
     model = Despesa
     form_class = DespesaForm
-    template_name = "gastos/add-gasto.html"
+    template_name = "gastos/gasto_form.html"
 
     def get_form_kwargs(self):
         kwargs = super(CreateGastoView, self).get_form_kwargs()
@@ -51,66 +53,56 @@ class CreateGastoView(CreateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
-        obj.usuario = self.request.user
+        obj.user = self.request.user
         obj.save()
         return HttpResponseRedirect("/")
 
+@method_decorator(login_required, name="dispatch")
+class GastoUpdateView(UpdateView):
+    model = Despesa
+    form_class = DespesasUpdateForm
+    template_name = "gastos/gasto_form.html"
+    success_url = '/'  
 
-@login_required(login_url="/autenticacao/login")
-def add_categoria(request):
-    if request.method == "POST":
-        form = CategoriaForm(request.POST)
-        if form.is_valid():
-            categoria = form.save(commit=False)
-            categoria.usuario = request.user
-            categoria.save()
-            # model = form.instance
-            return redirect("list-categoria")
-        return render(request, "gastos/add-categoria.html", {"form": form})
-    form = CategoriaForm()
-    return render(request, "gastos/add-categoria.html", {"form": form})
+    def get_form_kwargs(self):
+        kwargs = super(GastoUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
 
-@login_required(login_url="/autenticacao/login")
-def gasto_update(request, id):
-    gasto = Despesa.objects.get(id=id)
-    categorias = Categoria.objects.filter(usuario=request.user)
-    context = {
-        "gasto": gasto,
-        "valor": gasto,
-        "categorias": categorias,
-    }
-    if request.method == "GET":
-        return render(request, "gastos/update-gasto.html", context)
-    if request.method == "POST":
-        detalhes = request.POST["detalhes"]
-        valor_despesa = request.POST["valor_despesa"]
-        categoria = request.POST["categoria"]
-        data = request.POST["data"]
+@method_decorator(login_required, name="dispatch")
+class DeleteGastoView(DeleteView):
+    model = Despesa
+    success_url = '/'
 
-        gasto.usuario = request.user
-        gasto.detalhes = detalhes
-        gasto.valor_despesa = valor_despesa
-        gasto.categoria = Categoria.objects.get(nome=categoria)
-        gasto.data = data
-        gasto.save()
-
-        return redirect("main")
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 
-@login_required(login_url="/autenticacao/login")
-def gasto_delete(request, id):
-    gasto = Despesa.objects.get(id=id)
-    try:
-        gasto.delete()
-    except:
-        pass
-    return redirect("main")
+@method_decorator(login_required, name="dispatch")
+class CreateCategoriaView(CreateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "gastos/categoria_form.html"
+    
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return HttpResponseRedirect("list-categoria")
+
+
+@method_decorator(login_required, name="dispatch")
+class UpdateCategoriaView(UpdateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "gastos/categoria_form.html"
+    success_url = '/list-categoria'
 
 
 @login_required(login_url="/autenticacao/login")
 def list_categoria(request):
-    categorias = Categoria.objects.filter(usuario=request.user)
+    categorias = Categoria.objects.filter(user=request.user)
     paginator = Paginator(categorias, 8)
     numero_page = request.GET.get("page")
     obj_page = Paginator.get_page(paginator, numero_page)
@@ -119,37 +111,20 @@ def list_categoria(request):
     return render(request, "gastos/list-categoria.html", context)
 
 
-@login_required(login_url="/autenticacao/login")
-def categoria_update(request, id):
-    categoria = Categoria.objects.get(id=id)
-    form = CategoriaForm(initial={"nome": categoria.nome})
-    if request.method == "POST":
-        form = CategoriaForm(request.POST, instance=categoria)
-        if form.is_valid():
-            try:
-                form.save()
-                model = form.instance
-                return redirect("list-categoria")
-            except Exception as e:
-                pass
-    return render(request, "gastos/update-categoria.html", {"form": form})
+@method_decorator(login_required, name="dispatch")
+class DeleteCategoriaView(DeleteView):
+    model = Categoria
+    success_url = '/list-categoria'
 
-
-@login_required(login_url="/autenticacao/login")
-def categoria_delete(request, id):
-    categoria = Categoria.objects.get(id=id)
-    try:
-        categoria.delete()
-    except:
-        pass
-    return redirect("list-categoria")
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 
 # FUNÇÕES RELACIONADAS A RENDA
 @login_required(login_url="/autenticacao/login")
 def list_ganho(request):
-    ganho = Renda.objects.filter(usuario=request.user)
-    despesas = Despesa.objects.filter(usuario=request.user)
+    ganho = Renda.objects.filter(user=request.user)
+    despesas = Despesa.objects.filter(user=request.user)
     paginator = Paginator(ganho, 8)
     numero_page = request.GET.get("page")
     obj_page = Paginator.get_page(paginator, numero_page)
@@ -174,51 +149,33 @@ def list_ganho(request):
     return render(request, "ganhos/list-ganhos.html", context)
 
 
-@login_required(login_url="/autenticacao/login")
-def add_ganho(request):
-    if request.method == "POST":
-        form = RendaForm(request.POST)
-        if form.is_valid():
-            ganho = form.save(commit=False)
-            ganho.usuario = request.user
-            ganho.save()
-            # model = form.instance
-            return redirect("list-ganhos")
-        return render(request, "ganhos/add-ganho.html", {"form": form})
-    form = RendaForm()
-    return render(request, "ganhos/add-ganho.html", {"form": form})
+@method_decorator(login_required, name="dispatch")
+class CreateRendaView(CreateView):
+    model = Renda
+    form_class = RendaForm
+    template_name = "ganhos/ganho_form.html"
+    
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return HttpResponseRedirect("list-ganhos")
+
+@method_decorator(login_required, name="dispatch")
+class UpdateRendaView(UpdateView):
+    model = Renda
+    form_class = RendaForm
+    template_name = "ganhos/ganho_form.html"
+    success_url = '/list-ganhos'
 
 
-@login_required(login_url="/autenticacao/login")
-def ganho_update(request, id):
-    ganho = Renda.objects.get(id=id)
-    form = RendaForm(
-        initial={
-            "detalhes": ganho.detalhes,
-            "valor_renda": ganho.valor_renda,
-            "data": ganho.data,
-        }
-    )
-    if request.method == "POST":
-        form = RendaForm(request.POST, instance=ganho)
-        if form.is_valid():
-            try:
-                form.save()
-                model = form.instance
-                return redirect("list-ganhos")
-            except Exception as e:
-                pass
-    return render(request, "ganhos/update-ganhos.html", {"form": form})
+@method_decorator(login_required, name="dispatch")
+class DeleteRendaView(DeleteView):
+    model = Renda
+    success_url = '/list-ganhos'
 
-
-@login_required(login_url="/autenticacao/login")
-def ganho_delete(request, id):
-    ganho = Renda.objects.get(id=id)
-    try:
-        ganho.delete()
-    except:
-        pass
-    return redirect("list-ganhos")
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 
 # GRÁFICOS DESPESAS
@@ -231,7 +188,7 @@ def grafico_por_categoria(request):
         Despesa.objects.values("categoria__nome")
         .annotate(categoria_val=Sum("valor_despesa"))
         .order_by("-categoria_val")
-        .filter(usuario=request.user)
+        .filter(user=request.user)
     )
     for entry in queryset:
         labels.append(entry["categoria__nome"])
@@ -254,7 +211,7 @@ def grafico_despesas_por_mes(request):
         Despesa.objects.values("data__month")
         .annotate(renda_val=Sum("valor_despesa"))
         .order_by("data__month")
-        .filter(usuario=request.user)
+        .filter(user=request.user)
     )
     for entry in queryset:
         labels.append(entry["data__month"])
@@ -268,10 +225,11 @@ def grafico_despesas_por_mes(request):
     )
 
 
-@login_required(login_url="autenticacao/login")
-def mostra_grafico_mensal(request):
-    return render(request, "gastos/grafico-mensal.html")
-
+@method_decorator(login_required, name="dispatch")
+class MostraGraficoMensalView(ListView):
+    model = Despesa
+    template_name = "gastos/grafico-mensal.html"
+    
 
 @login_required(login_url="/autenticacao/login")
 def grafico_despesas_por_ano(request):
@@ -282,7 +240,7 @@ def grafico_despesas_por_ano(request):
         Despesa.objects.values("data__year")
         .annotate(renda_val=Sum("valor_despesa"))
         .order_by("data__year")
-        .filter(usuario=request.user)
+        .filter(user=request.user)
     )
     for entry in queryset:
         labels.append(entry["data__year"])
@@ -296,10 +254,10 @@ def grafico_despesas_por_ano(request):
     )
 
 
-@login_required(login_url="autenticacao/login")
-def mostra_grafico_anual(request):
-    return render(request, "gastos/grafico-anual.html")
-
+@method_decorator(login_required, name="dispatch")
+class MostraGraficoAnualView(ListView):
+    model = Despesa
+    template_name = "gastos/grafico-anual.html"
 
 # GRÁFICOS RECEITA
 @login_required(login_url="/autenticacao/login")
@@ -311,7 +269,7 @@ def grafico_renda_por_mes(request):
         Renda.objects.values("data__month")
         .annotate(renda_val=Sum("valor_renda"))
         .order_by("data__month")
-        .filter(usuario=request.user)
+        .filter(user=request.user)
     )
     for entry in queryset:
         labels.append(entry["data__month"])
@@ -334,7 +292,7 @@ def grafico_renda_por_ano(request):
         Renda.objects.values("data__year")
         .annotate(renda_val=Sum("valor_renda"))
         .order_by("data__year")
-        .filter(usuario=request.user)
+        .filter(user=request.user)
     )
     for entry in queryset:
         labels.append(entry["data__year"])
@@ -347,16 +305,15 @@ def grafico_renda_por_ano(request):
         }
     )
 
-
-@login_required(login_url="autenticacao/login")
-def mostra_renda_anual(request):
-    return render(request, "ganhos/grafico-renda-anual.html")
-
+@method_decorator(login_required, name="dispatch")
+class MostraGraficoRendaAnualView(ListView):
+    model = Renda
+    template_name = "ganhos/grafico-renda-anual.html"
 
 # LISTA DE DESEJOS
 @login_required(login_url="/autenticacao/login")
 def list_wish(request):
-    wishes = Wishlist.objects.filter(usuario=request.user)
+    wishes = Wishlist.objects.filter(user=request.user)
     paginator = Paginator(wishes, 8)
     numero_page = request.GET.get("page")
     obj_page = Paginator.get_page(paginator, numero_page)
@@ -369,42 +326,33 @@ def list_wish(request):
     return render(request, "lista/list-wish.html", context)
 
 
-@login_required(login_url="/autenticacao/login")
-def add_wish(request):
-    if request.method == "POST":
-        form = WishForm(request.POST)
-        if form.is_valid():
-            wish = form.save(commit=False)
-            wish.usuario = request.user
-            wish.save()
-            return redirect("list-wish")
-        return render(request, "lista/add-wish.html", {"form": form})
-    form = WishForm()
-    return render(request, "lista/add-wish.html", {"form": form})
+@method_decorator(login_required, name="dispatch")
+class WishCreateView(CreateView):
+    model = Wishlist
+    form_class = WishForm
+    template_name = "lista/wish_form.html"
+    
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return HttpResponseRedirect("list-wish")
 
 
-@login_required(login_url="/autenticacao/login")
-def wish_update(request, id):
-    wish = Wishlist.objects.get(id=id)
-    form = WishForm(
-        initial={
-            "detalhes": wish.detalhes,
-            "valor_necessario": wish.valor_necessario,
-            "valor_salvo": wish.valor_salvo,
-            "data": wish.data,
-        }
-    )
-    if request.method == "POST":
-        form = WishForm(request.POST, instance=wish)
-        if form.is_valid():
-            try:
-                form.save()
-                model = form.instance
-                return redirect("list-wish")
-            except Exception as e:
-                pass
-    return render(request, "lista/update-wish.html", {"form": form})
+@method_decorator(login_required, name="dispatch")
+class UpdateWishView(UpdateView):
+    model = Wishlist
+    form_class = WishForm
+    template_name = "lista/wish_form.html"
+    success_url = '/list-wish'
 
+@method_decorator(login_required, name="dispatch")
+class DeleteWishView(DeleteView):
+    model = Wishlist
+    success_url = '/list-wish'
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 @login_required(login_url="/autenticacao/login")
 def wish_delete(request, id):

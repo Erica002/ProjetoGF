@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="container-fluid px-4">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Criar Categoria</h4>
+            </div>
+            <div class="card-body" style="overflow-x:auto;">
+                {% if form.errors %} 
+                {% for field in form %} 
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                    {% endfor %} 
+                {% endfor %} 
+                
+                {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+                {% endfor %} 
+            {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group row mb-4">
+                        <label class="col-form-label text-md-right">Nome:</label>
+                      <div class="col-sm-12 col-md-7">{{ form.nome }}</div>
+                    </div>
+                    
+                    <div class="form-group row mb-4 mt-5" style="align-self: center;">
+                        <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
+                          <div class="col-sm-12 col-md-7">
+                            <a type="button" class="btn btn-danger" href="{%url 'list-categoria' %}">Cancelar</a>
+                            <button class="btn btn-primary">Salvar categoria</button>
+                          </div>
+                        </div>
+                      </div>  
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
