@@ -9,39 +9,43 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # FUNÇÕES RELACIONADAS A DESPESAS
-@login_required(login_url="/autenticacao/login")
-def index(request):
-    despesas = Despesa.objects.filter(user=request.user)
-    rendas = Renda.objects.filter(user=request.user)
-    paginator = Paginator(despesas, 7)
-    numero_page = request.GET.get("page")
-    obj_page = Paginator.get_page(paginator, numero_page)
-    valordespesas = 0
-    valorreceita = 0
-    valorsaldo = 0
+class MeusGastosView(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    for despesa in despesas:
-        valordespesas += despesa.valor_despesa
-    for renda in rendas:
-        valorreceita += renda.valor_renda
+    def get(self, request):
+        despesas = Despesa.objects.filter(user=request.user)
+        rendas = Renda.objects.filter(user=request.user)
+        paginator = Paginator(despesas, 7)
+        numero_page = request.GET.get("page")
+        obj_page = Paginator.get_page(paginator, numero_page)
+        valordespesas = 0
+        valorreceita = 0
+        valorsaldo = 0
 
-    valorsaldo = valorreceita - valordespesas
-    # dicionário
-    context = {
-        "despesas": despesas,
-        "obj_page": obj_page,
-        "rendas": rendas,
-        "valordespesas": valordespesas,
-        "valorreceita": valorreceita,
-        "valorsaldo": valorsaldo,
-    }
-    return render(request, "gastos/index.html", context)
+        for despesa in despesas:
+            valordespesas += despesa.valor_despesa
+        for renda in rendas:
+            valorreceita += renda.valor_renda
+
+        valorsaldo = valorreceita - valordespesas
+        # dicionário
+        context = {
+            "despesas": despesas,
+            "obj_page": obj_page,
+            "rendas": rendas,
+            "valordespesas": valordespesas,
+            "valorreceita": valorreceita,
+            "valorsaldo": valorsaldo,
+        }
+        return render(request, "gastos/index.html", context)
 
 
-@method_decorator(login_required, name="dispatch")
-class CreateGastoView(CreateView):
+class CreateGastoView(LoginRequiredMixin, CreateView):
+    login_url = "/autenticacao/login"
     model = Despesa
     form_class = DespesaForm
     template_name = "gastos/gasto_form.html"
@@ -58,8 +62,8 @@ class CreateGastoView(CreateView):
         return HttpResponseRedirect("/")
 
 
-@method_decorator(login_required, name="dispatch")
-class GastoUpdateView(UpdateView):
+class GastoUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = "/autenticacao/login"
     model = Despesa
     form_class = DespesasUpdateForm
     template_name = "gastos/gasto_form.html"
@@ -71,8 +75,8 @@ class GastoUpdateView(UpdateView):
         return kwargs
 
 
-@method_decorator(login_required, name="dispatch")
-class DeleteGastoView(DeleteView):
+class DeleteGastoView(LoginRequiredMixin, DeleteView):
+    login_url = "/autenticacao/login"
     model = Despesa
     success_url = "/"
 
@@ -80,8 +84,8 @@ class DeleteGastoView(DeleteView):
         return self.delete(request, *args, **kwargs)
 
 
-@method_decorator(login_required, name="dispatch")
-class CreateCategoriaView(CreateView):
+class CreateCategoriaView(LoginRequiredMixin, CreateView):
+    login_url = "/autenticacao/login"
     model = Categoria
     form_class = CategoriaForm
     template_name = "gastos/categoria_form.html"
@@ -93,27 +97,29 @@ class CreateCategoriaView(CreateView):
         return HttpResponseRedirect("list-categoria")
 
 
-@method_decorator(login_required, name="dispatch")
-class UpdateCategoriaView(UpdateView):
+class UpdateCategoriaView(LoginRequiredMixin, UpdateView):
+    login_url = "/autenticacao/login"
     model = Categoria
     form_class = CategoriaForm
     template_name = "gastos/categoria_form.html"
     success_url = "/list-categoria"
 
 
-@login_required(login_url="/autenticacao/login")
-def list_categoria(request):
-    categorias = Categoria.objects.filter(user=request.user)
-    paginator = Paginator(categorias, 8)
-    numero_page = request.GET.get("page")
-    obj_page = Paginator.get_page(paginator, numero_page)
-    # dicionário
-    context = {"categorias": categorias, "obj_page": obj_page}
-    return render(request, "gastos/list-categoria.html", context)
+class ListarCategoriaView(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
+
+    def get(self, request):
+        categorias = Categoria.objects.filter(user=request.user)
+        paginator = Paginator(categorias, 8)
+        numero_page = request.GET.get("page")
+        obj_page = Paginator.get_page(paginator, numero_page)
+        # dicionário
+        context = {"categorias": categorias, "obj_page": obj_page}
+        return render(request, "gastos/list-categoria.html", context)
 
 
-@method_decorator(login_required, name="dispatch")
-class DeleteCategoriaView(DeleteView):
+class DeleteCategoriaView(LoginRequiredMixin, DeleteView):
+    login_url = "/autenticacao/login"
     model = Categoria
     success_url = "/list-categoria"
 
@@ -121,37 +127,38 @@ class DeleteCategoriaView(DeleteView):
         return self.delete(request, *args, **kwargs)
 
 
-# FUNÇÕES RELACIONADAS A RENDA
-@login_required(login_url="/autenticacao/login")
-def list_ganho(request):
-    ganho = Renda.objects.filter(user=request.user)
-    despesas = Despesa.objects.filter(user=request.user)
-    paginator = Paginator(ganho, 8)
-    numero_page = request.GET.get("page")
-    obj_page = Paginator.get_page(paginator, numero_page)
-    valordespesas = 0
-    valorreceita = 0
-    valorsaldo = 0
+class ListagemGanhoView(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    for despesa in despesas:
-        valordespesas += despesa.valor_despesa
-    for renda in ganho:
-        valorreceita += renda.valor_renda
+    def get(self, request):
+        ganho = Renda.objects.filter(user=request.user)
+        despesas = Despesa.objects.filter(user=request.user)
+        paginator = Paginator(ganho, 8)
+        numero_page = request.GET.get("page")
+        obj_page = Paginator.get_page(paginator, numero_page)
+        valordespesas = 0
+        valorreceita = 0
+        valorsaldo = 0
 
-    valorsaldo = valorreceita - valordespesas
-    # dicionário
-    context = {
-        "ganho": ganho,
-        "obj_page": obj_page,
-        "despesas": despesas,
-        "valorreceita": valorreceita,
-        "valorsaldo": valorsaldo,
-    }
-    return render(request, "ganhos/list-ganhos.html", context)
+        for despesa in despesas:
+            valordespesas += despesa.valor_despesa
+        for renda in ganho:
+            valorreceita += renda.valor_renda
+
+        valorsaldo = valorreceita - valordespesas
+        # dicionário
+        context = {
+            "ganho": ganho,
+            "obj_page": obj_page,
+            "despesas": despesas,
+            "valorreceita": valorreceita,
+            "valorsaldo": valorsaldo,
+        }
+        return render(request, "ganhos/list-ganhos.html", context)
 
 
-@method_decorator(login_required, name="dispatch")
-class CreateRendaView(CreateView):
+class CreateRendaView(LoginRequiredMixin, CreateView):
+    login_url = "/autenticacao/login"
     model = Renda
     form_class = RendaForm
     template_name = "ganhos/ganho_form.html"
@@ -163,16 +170,16 @@ class CreateRendaView(CreateView):
         return HttpResponseRedirect("list-ganhos")
 
 
-@method_decorator(login_required, name="dispatch")
-class UpdateRendaView(UpdateView):
+class UpdateRendaView(LoginRequiredMixin, UpdateView):
+    login_url = "/autenticacao/login"
     model = Renda
     form_class = RendaForm
     template_name = "ganhos/ganho_form.html"
     success_url = "/list-ganhos"
 
 
-@method_decorator(login_required, name="dispatch")
-class DeleteRendaView(DeleteView):
+class DeleteRendaView(LoginRequiredMixin, DeleteView):
+    login_url = "/autenticacao/login"
     model = Renda
     success_url = "/list-ganhos"
 
@@ -181,158 +188,170 @@ class DeleteRendaView(DeleteView):
 
 
 # GRÁFICOS DESPESAS
-@login_required(login_url="/autenticacao/login")
-def grafico_por_categoria(request):
-    labels = []
-    data = []
+class grafico_por_categoria(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    queryset = (
-        Despesa.objects.values("categoria__nome")
-        .annotate(categoria_val=Sum("valor_despesa"))
-        .order_by("-categoria_val")
-        .filter(user=request.user)
-    )
-    for entry in queryset:
-        labels.append(entry["categoria__nome"])
-        data.append(entry["categoria_val"])
+    def get(self, request):
+        labels = []
+        data = []
 
-    return JsonResponse(
-        data={
-            "labels": labels,
-            "data": data,
-        }
-    )
+        queryset = (
+            Despesa.objects.values("categoria__nome")
+            .annotate(categoria_val=Sum("valor_despesa"))
+            .order_by("-categoria_val")
+            .filter(user=request.user)
+        )
+        for entry in queryset:
+            labels.append(entry["categoria__nome"])
+            data.append(entry["categoria_val"])
 
-
-@login_required(login_url="/autenticacao/login")
-def grafico_despesas_por_mes(request):
-    labels = []
-    data = []
-
-    queryset = (
-        Despesa.objects.values("data__month")
-        .annotate(renda_val=Sum("valor_despesa"))
-        .order_by("data__month")
-        .filter(user=request.user)
-    )
-    for entry in queryset:
-        labels.append(entry["data__month"])
-        data.append(entry["renda_val"])
-
-    return JsonResponse(
-        data={
-            "labels": labels,
-            "data": data,
-        }
-    )
+        return JsonResponse(
+            data={
+                "labels": labels,
+                "data": data,
+            }
+        )
 
 
-@method_decorator(login_required, name="dispatch")
-class MostraGraficoMensalView(ListView):
+class grafico_despesas_por_mes(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
+
+    def get(self, request):
+        labels = []
+        data = []
+
+        queryset = (
+            Despesa.objects.values("data__month")
+            .annotate(renda_val=Sum("valor_despesa"))
+            .order_by("data__month")
+            .filter(user=request.user)
+        )
+        for entry in queryset:
+            labels.append(entry["data__month"])
+            data.append(entry["renda_val"])
+
+        return JsonResponse(
+            data={
+                "labels": labels,
+                "data": data,
+            }
+        )
+
+
+class MostraGraficoMensalView(LoginRequiredMixin, ListView):
+    login_url = "/autenticacao/login"
     model = Despesa
     template_name = "gastos/grafico-mensal.html"
 
 
-@login_required(login_url="/autenticacao/login")
-def grafico_despesas_por_ano(request):
-    labels = []
-    data = []
+class grafico_despesas_por_ano(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    queryset = (
-        Despesa.objects.values("data__year")
-        .annotate(renda_val=Sum("valor_despesa"))
-        .order_by("data__year")
-        .filter(user=request.user)
-    )
-    for entry in queryset:
-        labels.append(entry["data__year"])
-        data.append(entry["renda_val"])
+    def get(self, request):
+        labels = []
+        data = []
 
-    return JsonResponse(
-        data={
-            "labels": labels,
-            "data": data,
-        }
-    )
+        queryset = (
+            Despesa.objects.values("data__year")
+            .annotate(renda_val=Sum("valor_despesa"))
+            .order_by("data__year")
+            .filter(user=request.user)
+        )
+        for entry in queryset:
+            labels.append(entry["data__year"])
+            data.append(entry["renda_val"])
+
+        return JsonResponse(
+            data={
+                "labels": labels,
+                "data": data,
+            }
+        )
 
 
-@method_decorator(login_required, name="dispatch")
-class MostraGraficoAnualView(ListView):
+class MostraGraficoAnualView(LoginRequiredMixin, ListView):
+    login_url = "/autenticacao/login"
     model = Despesa
     template_name = "gastos/grafico-anual.html"
 
 
 # GRÁFICOS RECEITA
-@login_required(login_url="/autenticacao/login")
-def grafico_renda_por_mes(request):
-    labels = []
-    data = []
+class grafico_renda_por_mes(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    queryset = (
-        Renda.objects.values("data__month")
-        .annotate(renda_val=Sum("valor_renda"))
-        .order_by("data__month")
-        .filter(user=request.user)
-    )
-    for entry in queryset:
-        labels.append(entry["data__month"])
-        data.append(entry["renda_val"])
+    def get(self, request):
+        labels = []
+        data = []
 
-    return JsonResponse(
-        data={
-            "labels": labels,
-            "data": data,
-        }
-    )
+        queryset = (
+            Renda.objects.values("data__month")
+            .annotate(renda_val=Sum("valor_renda"))
+            .order_by("data__month")
+            .filter(user=request.user)
+        )
+        for entry in queryset:
+            labels.append(entry["data__month"])
+            data.append(entry["renda_val"])
 
-
-@login_required(login_url="/autenticacao/login")
-def grafico_renda_por_ano(request):
-    labels = []
-    data = []
-
-    queryset = (
-        Renda.objects.values("data__year")
-        .annotate(renda_val=Sum("valor_renda"))
-        .order_by("data__year")
-        .filter(user=request.user)
-    )
-    for entry in queryset:
-        labels.append(entry["data__year"])
-        data.append(entry["renda_val"])
-
-    return JsonResponse(
-        data={
-            "labels": labels,
-            "data": data,
-        }
-    )
+        return JsonResponse(
+            data={
+                "labels": labels,
+                "data": data,
+            }
+        )
 
 
-@method_decorator(login_required, name="dispatch")
-class MostraGraficoRendaAnualView(ListView):
+class grafico_renda_por_ano(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
+
+    def get(self, request):
+        labels = []
+        data = []
+
+        queryset = (
+            Renda.objects.values("data__year")
+            .annotate(renda_val=Sum("valor_renda"))
+            .order_by("data__year")
+            .filter(user=request.user)
+        )
+        for entry in queryset:
+            labels.append(entry["data__year"])
+            data.append(entry["renda_val"])
+
+        return JsonResponse(
+            data={
+                "labels": labels,
+                "data": data,
+            }
+        )
+
+
+class MostraGraficoRendaAnualView(LoginRequiredMixin, ListView):
+    login_url = "/autenticacao/login"
     model = Renda
     template_name = "ganhos/grafico-renda-anual.html"
 
 
 # LISTA DE DESEJOS
-@login_required(login_url="/autenticacao/login")
-def list_wish(request):
-    wishes = Wishlist.objects.filter(user=request.user)
-    paginator = Paginator(wishes, 8)
-    numero_page = request.GET.get("page")
-    obj_page = Paginator.get_page(paginator, numero_page)
+class ListagemWishesView(LoginRequiredMixin, View):
+    login_url = "/autenticacao/login"
 
-    # dicionário
-    context = {
-        "wishes": wishes,
-        "obj_page": obj_page,
-    }
-    return render(request, "lista/list-wish.html", context)
+    def get(self, request):
+        wishes = Wishlist.objects.filter(user=request.user)
+        paginator = Paginator(wishes, 8)
+        numero_page = request.GET.get("page")
+        obj_page = Paginator.get_page(paginator, numero_page)
+
+        # dicionário
+        context = {
+            "wishes": wishes,
+            "obj_page": obj_page,
+        }
+        return render(request, "lista/list-wish.html", context)
 
 
-@method_decorator(login_required, name="dispatch")
-class WishCreateView(CreateView):
+class WishCreateView(LoginRequiredMixin, CreateView):
+    login_url = "/autenticacao/login"
     model = Wishlist
     form_class = WishForm
     template_name = "lista/wish_form.html"
@@ -344,28 +363,18 @@ class WishCreateView(CreateView):
         return HttpResponseRedirect("list-wish")
 
 
-@method_decorator(login_required, name="dispatch")
-class UpdateWishView(UpdateView):
+class UpdateWishView(LoginRequiredMixin, UpdateView):
+    login_url = "/autenticacao/login"
     model = Wishlist
     form_class = WishForm
     template_name = "lista/wish_form.html"
     success_url = "/list-wish"
 
 
-@method_decorator(login_required, name="dispatch")
-class DeleteWishView(DeleteView):
+class DeleteWishView(LoginRequiredMixin, DeleteView):
+    login_url = "/autenticacao/login"
     model = Wishlist
     success_url = "/list-wish"
 
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
-
-
-@login_required(login_url="/autenticacao/login")
-def wish_delete(request, id):
-    wish = Wishlist.objects.get(id=id)
-    try:
-        wish.delete()
-    except:
-        pass
-    return redirect("list-wish")
